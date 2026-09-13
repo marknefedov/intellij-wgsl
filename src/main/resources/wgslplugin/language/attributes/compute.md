@@ -1,1 +1,0 @@
-Declares the function to be an entry point for the compute shader stage of a compute pipeline.

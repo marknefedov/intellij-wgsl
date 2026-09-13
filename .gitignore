@@ -2,3 +2,5 @@
 .idea
 .qodana
 build
+.intellijPlatform
+build-bootstrap.log

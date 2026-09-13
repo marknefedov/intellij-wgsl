@@ -1,274 +1,87 @@
-# GitHub Actions Workflow is created for testing and preparing the plugin release in the following steps:
-# - Validate Gradle Wrapper.
-# - Run 'test' and 'verifyPlugin' tasks.
-# - Run Qodana inspections.
-# - Run the 'buildPlugin' task and prepare artifact for further tests.
-# - Run the 'runPluginVerifier' task.
-# - Create a draft release.
-#
-# The workflow is triggered on push and pull_request events.
-#
-# GitHub Actions reference: https://help.github.com/en/actions
-#
-## JBIJPPTPL
-
 name: Build
 on:
-  # Trigger the workflow on pushes to only the 'main' branch (this avoids duplicate checks being run e.g., for dependabot pull requests)
   push:
-    branches: [ main ]
-  # Trigger the workflow on any pull request
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-
-  # Prepare environment and build the plugin
   build:
-    name: Build
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.properties.outputs.version }}
-      changelog: ${{ steps.properties.outputs.changelog }}
-      pluginVerifierHomeDir: ${{ steps.properties.outputs.pluginVerifierHomeDir }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-
-      # Free GitHub Actions Environment Disk Space
-      - name: Maximize Build Space
-        run: |
-          # Remove software and language runtimes we're not using
-          sudo rm -rf \
-            "$AGENT_TOOLSDIRECTORY" \
-            /opt/google/chrome \
-            /opt/microsoft/msedge \
-            /opt/microsoft/powershell \
-            /opt/pipx \
-            /usr/lib/mono \
-            /usr/local/julia* \
-            /usr/local/lib/android \
-            /usr/local/lib/node_modules \
-            /usr/local/share/chromium \
-            /usr/local/share/powershell \
-            /usr/share/dotnet \
-            /usr/share/swift
-          df -h /
-      # Check out current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v4
-
-      # Set up Java environment for the next steps
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
-          distribution: zulu
+          distribution: temurin
           java-version: 21
-
-      # Setup Gradle
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      # Set environment variables
-      - name: Export Properties
-        id: properties
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test and package
         shell: bash
-        run: |
-          PROPERTIES="$(./gradlew properties --console=plain -q)"
-          VERSION="$(echo "$PROPERTIES" | grep "^version:" | cut -f2- -d ' ')"
-          CHANGELOG="$(./gradlew getChangelog --unreleased --no-header --console=plain -q)"
-
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "pluginVerifierHomeDir=~/.pluginVerifier" >> $GITHUB_OUTPUT
-          
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      # Build plugin
-      - name: Build plugin
-        run: ./gradlew buildPlugin
-
-      # Prepare plugin archive content for creating artifact
-      - name: Prepare Plugin Artifact
-        id: artifact
-        shell: bash
-        run: |
-          cd ${{ github.workspace }}/build/distributions
-          FILENAME=`ls *.zip`
-          unzip "$FILENAME" -d content
-
-          echo "filename=${FILENAME:0:-4}" >> $GITHUB_OUTPUT
-
-      # Store already-built plugin as an artifact for downloading
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        run: ./gradlew test buildPlugin verifyPluginStructure
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: ${{ steps.artifact.outputs.filename }}
-          path: ./build/distributions/content/*/*
-
-  # Run tests and upload a code coverage report
-  test:
-    name: Test
-    needs: [ build ]
-    runs-on: ubuntu-latest
-    steps:
-
-      # Check out the current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v4
-
-      # Set up Java environment for the next steps
-      - name: Setup Java
-        uses: actions/setup-java@v4
+          name: reports-${{ matrix.os }}
+          path: build/reports/
+      - uses: actions/upload-artifact@v4
         with:
-          distribution: zulu
-          java-version: 21
+          name: plugin-${{ matrix.os }}
+          path: build/distributions/*.zip
 
-      # Setup Gradle
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      # Run tests
-      - name: Run Tests
-        run: ./gradlew check
-
-      # Collect Tests Result of failed tests
-      - name: Collect Tests Result
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: tests-result
-          path: ${{ github.workspace }}/build/reports/tests
-
-      # Upload the Kover report to CodeCov
-      - name: Upload Code Coverage Report
-        uses: codecov/codecov-action@v5
-        with:
-          files: ${{ github.workspace }}/build/reports/kover/report.xml
-
-  # Run Qodana inspections and provide report
-  inspectCode:
-    name: Inspect code
-    needs: [ build ]
-    runs-on: ubuntu-latest
-    if: false
-    permissions:
-      contents: write
-      checks: write
-      pull-requests: write
-    steps:
-
-      # Free GitHub Actions Environment Disk Space
-      - name: Maximize Build Space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          large-packages: false
-
-      # Check out the current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
-          fetch-depth: 0  # a full history is required for pull request analysis
-
-      # Set up Java environment for the next steps
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: zulu
-          java-version: 21
-
-      # Run Qodana inspections
-      - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v2024.2
-        with:
-          cache-default-branch-only: true
-
-  # Run plugin structure verification along with IntelliJ Plugin Verifier
   verify:
-    name: Verify plugin
-    needs: [ build ]
     runs-on: ubuntu-latest
     steps:
-
-      # Free GitHub Actions Environment Disk Space
-      - name: Maximize Build Space
-        uses: jlumbroso/free-disk-space@main
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
-          tool-cache: false
-          large-packages: false
-
-      # Check out the current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v4
-
-      # Set up Java environment for the next steps
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: zulu
+          distribution: temurin
           java-version: 21
-
-      # Setup Gradle
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      # Cache Plugin Verifier IDEs
-      - name: Setup Plugin Verifier IDEs Cache
-        uses: actions/cache@v4
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew verifyPlugin
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          path: ${{ needs.build.outputs.pluginVerifierHomeDir }}/ides
-          key: plugin-verifier-${{ hashFiles('build/listProductsReleases.txt') }}
+          name: plugin-verifier
+          path: build/reports/pluginVerifier/
 
-      # Run Verify Plugin task and IntelliJ Plugin Verifier tool
-      - name: Run Plugin Verification tasks
-        run: ./gradlew verifyPlugin -Dplugin.verifier.home.dir=${{ needs.build.outputs.pluginVerifierHomeDir }}
-
-      # Collect Plugin Verifier Result
-      - name: Collect Plugin Verifier Result
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: pluginVerifier-result
-          path: ${{ github.workspace }}/build/reports/pluginVerifier
-
-  # Prepare a draft release for GitHub Releases page for the manual verification
-  # If accepted and published, release workflow would be triggered
   releaseDraft:
     name: Release draft
-    if: github.event_name != 'pull_request'
-    # needs: [ build, test, inspectCode, verify ]
-    needs: [ build, test, verify ]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build, verify]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-
-      # Check out the current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v4
-
-      # Remove old release drafts by using the curl request for the available releases with a draft flag
-      - name: Remove Old Release Drafts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Prepare release notes
+        shell: bash
         run: |
-          gh api repos/{owner}/{repo}/releases \
-            --jq '.[] | select(.draft == true) | .id' \
-            | xargs -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}
-
-      # Create a new release draft which is not publicly visible and requires manual acceptance
-      - name: Create Release Draft
+          VERSION=$(sed -n 's/^pluginVersion *= *//p' gradle.properties | tr -d '\r')
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
+          ./gradlew getChangelog --unreleased --no-header --console=plain -q > release-notes.md
+      - name: Create or update draft
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
-          gh release create "v${{ needs.build.outputs.version }}" \
-            --draft \
-            --title "v${{ needs.build.outputs.version }}" \
-            --notes "$(cat << 'EOM'
-          ${{ needs.build.outputs.changelog }}
-          EOM
-          )"
+          TAG="v$RELEASE_VERSION"
+          if gh release view "$TAG" --json isDraft --jq .isDraft > draft-state.txt 2>/dev/null; then
+            if [ "$(cat draft-state.txt)" = true ]; then
+              gh release edit "$TAG" --title "$TAG" --notes-file release-notes.md
+            fi
+          else
+            gh release create "$TAG" --draft --title "$TAG" --notes-file release-notes.md
+          fi

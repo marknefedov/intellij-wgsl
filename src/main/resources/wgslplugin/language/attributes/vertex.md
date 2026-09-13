@@ -1,1 +1,0 @@
-Declares the function to be an entry point for the vertex shader stage of a render pipeline.

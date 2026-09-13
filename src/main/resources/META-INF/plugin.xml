@@ -1,58 +1,18 @@
-<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>WGSL</id>
     <name>WGSL Support</name>
-    <description>
-        <![CDATA[
-        This plugin adds syntax highlighting support for WGSL - the WebGPU Shading Language.<br/>
-        Open a wgsl file and marvel at the pretty colours.
-        ]]>
-    </description>
-
-    <category>Custom Languages</category>
     <vendor>dparnell</vendor>
-
-    <idea-version since-build="203"/>
+    <category>Custom Languages</category>
     <depends>com.intellij.modules.lang</depends>
-    <depends>org.intellij.plugins.markdown</depends>
-
+    <depends>com.intellij.modules.lsp</depends>
+    <depends>com.intellij.modules.ultimate</depends>
+    <depends>org.jetbrains.plugins.textmate</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="WGSL File"
-                  implementationClass="wgslplugin.language.WGSLFileType"
-                  fieldName="INSTANCE"
-                  language="WGSL"
-                  extensions="wgsl"/>
-
-        <lang.parserDefinition language="WGSL"
-                               implementationClass="wgslplugin.language.WGSLParserDefinition"/>
-
-        <lang.syntaxHighlighterFactory language="WGSL"
-                                       implementationClass="wgslplugin.language.WGSLSyntaxHighlighterFactory"/>
-
-        <annotator language="WGSL" implementationClass="wgslplugin.language.WGSLAnnotator"/>
-
-        <lang.foldingBuilder language="WGSL" implementationClass="wgslplugin.language.WGSLFoldingBuilder"/>
-
-        <lang.commenter
-                language="WGSL"
-                implementationClass="wgslplugin.language.WGSLCommenter"/>
-
-        <colorSettingsPage implementation="wgslplugin.language.WGSLColourSettingsPage"/>
-
-        <lang.refactoringSupport language="WGSL"
-                                 implementationClass="wgslplugin.language.WGSLRefactoringSupportProvider"/>
-
-
-        <lang.braceMatcher language="WGSL" implementationClass="wgslplugin.language.WGSLBracketMatcher"/>
-
-        <lang.documentationProvider language="WGSL"
-                                    implementationClass="wgslplugin.language.WGSLDocumentationProvider"/>
-        <completion.contributor language="WGSL" implementationClass="wgslplugin.language.WGSLKeywordCompletionContributor"/>
-        <completion.contributor language="WGSL" implementationClass="wgslplugin.language.WGSLBuiltInCompletionContributor"/>
-        <projectConfigurable parentId="tools" instance="wgslplugin.language.WGSLSettingsConfigurable"
-            id="wgslplugin.language.WGSLSettingsConfigurable"
-            displayName="WGSL"
-            nonDefaultProject="true"/>
-        <projectService serviceImplementation="wgslplugin.language.WGSLSettingsState"/>
+        <fileType name="WGSL File" implementationClass="wgslplugin.WgslFileType" fieldName="WGSL" extensions="wgsl"/>
+        <fileType name="WESL File" implementationClass="wgslplugin.WgslFileType" fieldName="WESL" extensions="wesl"/>
+        <textmate.bundleProvider implementation="wgslplugin.WgslTextMateBundleProvider"/>
+        <platform.lsp.integrationProvider implementation="wgslplugin.WgslLspIntegrationProvider"/>
+        <projectConfigurable parentId="language" instance="wgslplugin.WgslSettingsConfigurable"
+                             id="wgsl.languageServer" displayName="WGSL / WESL"/>
     </extensions>
 </idea-plugin>

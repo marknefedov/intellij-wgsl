@@ -4,6 +4,12 @@
 
 ## Unreleased
 
+- Rebuild the plugin in Kotlin using JetBrains LSP and upstream WGSL/WESL TextMate grammars.
+- Download and verify pinned wgsl-analyzer binaries on first use, with a custom executable option.
+- Add project server settings and restart integration with the Language Services widget.
+- Require an LSP-capable IntelliJ IDE 2026.1.4 or newer; migrate to Gradle 9.7.1 and Java 21.
+- Remove the native parser, JFlex lexer, semantic analysis, and legacy custom URL imports.
+
 ## 0.0.37 - 2025-08-12
 
 - update base platform version
