@@ -6,6 +6,12 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to publish to JetBrains Marketplace
+        required: true
+        type: string
 
 jobs:
 
@@ -16,13 +22,21 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
     steps:
 
       # Check out the current repository
       - name: Fetch Sources
         uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Check release version
+        shell: bash
+        run: |
+          VERSION=$(sed -n 's/^pluginVersion *= *//p' gradle.properties | tr -d '\r')
+          test "$RELEASE_TAG" = "v$VERSION"
 
       # Set up Java environment for the next steps
       - name: Setup Java
@@ -41,7 +55,11 @@ jobs:
         shell: bash
         env:
           RELEASE_NOTES: ${{ github.event.release.body }}
+          GH_TOKEN: ${{ github.token }}
         run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            RELEASE_NOTES="$(gh release view "$RELEASE_TAG" --json body --jq .body)"
+          fi
           CHANGELOG="$(printf '%s\n' "$RELEASE_NOTES" | sed -e 's/^[[:space:]]*$//g' -e '/./,$!d')"
           
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
@@ -66,7 +84,12 @@ jobs:
           CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
-        run: ./gradlew publishPlugin
+        shell: bash
+        run: |
+          PUBLISH_TOKEN="$(printf '%s' "$PUBLISH_TOKEN" | tr -d '\r\n')"
+          test -n "$PUBLISH_TOKEN"
+          echo "::add-mask::$PUBLISH_TOKEN"
+          ./gradlew publishPlugin
 
       # Create a pull request
       - name: Create Pull Request
@@ -74,7 +97,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ github.event.release.tag_name }}"
+          VERSION="$RELEASE_TAG"
           BRANCH="changelog-update-$VERSION"
           LABEL="release changelog"
 
