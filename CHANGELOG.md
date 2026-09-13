@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.3.0 - 2026-09-13
+
 - Switch the managed server to the pinned 2026-09-13 release of marknefedov/wgsl-analyzer, with verified archive and executable checksums for all supported platforms.
 - Replace deprecated DynamicBundle inheritance with the supported class-based constructor.
 - Publish releases to JetBrains Marketplace after tests and compatibility verification, alongside signed GitHub release assets.
@@ -15,11 +17,8 @@
 ## 0.1.0 - 2026-09-13
 
 - Add configurable WGSL/WESL type, function, field, parameter, and variable colors with light and dark defaults, using the existing TextMate lexer.
-
 - Improve WGSL/WESL TextMate scopes for structs, aliases, explicit types, parameters, and fields, including lowercase type names and nested templates.
-
 - Modernize settings with Kotlin UI DSL, localized labels, and tracked state with immutable snapshots; upgrade the Kotlin compiler to 2.4.20.
-
 - Rebuild the plugin in Kotlin using JetBrains LSP and upstream WGSL/WESL TextMate grammars.
 - Download and verify pinned wgsl-analyzer binaries on first use, with a custom executable option.
 - Add project server settings and restart integration with the Language Services widget.
