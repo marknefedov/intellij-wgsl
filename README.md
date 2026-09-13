@@ -14,10 +14,11 @@ newer**, and the bundled **TextMate Bundles** plugin.
 
 1. Install the plugin and open a `.wgsl` or `.wesl` file.
 2. On the first language-server startup, the plugin downloads the pinned
-   **wgsl-analyzer 2026-04-26** release from GitHub. Both the archive and executable
+   **wgsl-analyzer 2026-09-13** release from [marknefedov/wgsl-analyzer](https://github.com/marknefedov/wgsl-analyzer/releases/tag/2026-09-13).
+   Both the archive and executable
    are checked against bundled SHA-256 digests before execution.
 3. Subsequent starts reuse the verified executable from
-   `<IDE system/cache directory>/intellij-wgsl/wgsl-analyzer/2026-04-26/<target>/`.
+   `<IDE system/cache directory>/intellij-wgsl/wgsl-analyzer/2026-09-13/<target>/`.
 4. Use the IDE's Language Services widget to inspect server status, restart it,
    or open its settings. Syntax highlighting also works offline without a server.
 

@@ -18,12 +18,12 @@ import java.util.zip.ZipInputStream
 
 /** Installs only pinned, verified executables. Archive entry paths never become output paths. */
 object WgslServerInstaller {
-    const val VERSION = "2026-04-26"
+    const val VERSION = "2026-09-13"
     private const val MAX_BINARY_BYTES = 128L * 1024 * 1024
 
     data class Asset(val target: String, val name: String, val archiveSha256: String, val binarySha256: String) {
         val executableName: String get() = if (name.endsWith(".zip")) "wgsl-analyzer.exe" else "wgsl-analyzer"
-        val url: String get() = "https://github.com/wgsl-analyzer/wgsl-analyzer/releases/download/$VERSION/$name"
+        val url: String get() = "https://github.com/marknefedov/wgsl-analyzer/releases/download/$VERSION/$name"
     }
 
     fun currentAsset(): Asset = assetFor(System.getProperty("os.name"), System.getProperty("os.arch"))

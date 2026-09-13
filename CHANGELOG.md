@@ -4,7 +4,15 @@
 
 ## Unreleased
 
+- Switch the managed server to the pinned 2026-09-13 release of marknefedov/wgsl-analyzer, with verified archive and executable checksums for all supported platforms.
+- Replace deprecated DynamicBundle inheritance with the supported class-based constructor.
+- Publish releases to JetBrains Marketplace after tests and compatibility verification, alongside signed GitHub release assets.
+
+## 0.2.0 - 2026-09-13
+
 - Store managed wgsl-analyzer binaries in the plugin-specific `intellij-wgsl/wgsl-analyzer` IDE cache directory using `PathManager.getSystemDir()`.
+
+## 0.1.0 - 2026-09-13
 
 - Add configurable WGSL/WESL type, function, field, parameter, and variable colors with light and dark defaults, using the existing TextMate lexer.
 
