@@ -1,0 +1,52 @@
+name: Release assets
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+      - uses: actions/setup-java@v6.0.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6.3.0
+      - name: Check release version
+        run: |
+          VERSION=$(sed -n 's/^pluginVersion *= *//p' gradle.properties | tr -d '\r')
+          test "$RELEASE_TAG" = "v$VERSION"
+      - name: Test and verify plugin
+        run: ./gradlew test buildPlugin verifyPluginStructure verifyPlugin
+      - name: Sign plugin
+        env:
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+        run: |
+          test -n "$CERTIFICATE_CHAIN"
+          test -n "$PRIVATE_KEY"
+          ./gradlew signPlugin
+      - name: Attach signed release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$RELEASE_TAG" build/distributions/*-signed.zip --clobber
+      - uses: actions/upload-artifact@v7.0.1
+        if: always()
+        with:
+          name: release-reports
+          path: build/reports/
