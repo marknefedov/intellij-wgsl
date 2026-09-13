@@ -1,0 +1,15 @@
+{
+  "name": "wgsl-intellij-grammars",
+  "displayName": "WGSL and WESL",
+  "version": "0.1.0",
+  "contributes": {
+    "languages": [
+      { "id": "wgsl", "aliases": ["WGSL"], "extensions": [".wgsl"], "configuration": "./language-configuration.json" },
+      { "id": "wesl", "aliases": ["WESL"], "extensions": [".wesl"], "configuration": "./language-configuration.json" }
+    ],
+    "grammars": [
+      { "language": "wgsl", "scopeName": "source.wgsl", "path": "./syntaxes/wgsl.tmLanguage.json" },
+      { "language": "wesl", "scopeName": "source.wesl", "path": "./syntaxes/wesl.tmLanguage.json" }
+    ]
+  }
+}

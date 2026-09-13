@@ -1,0 +1,66 @@
+{
+	"comments": {
+		"lineComment": "//",
+		"blockComment": ["/*", "*/"]
+	},
+	"brackets": [["{", "}"], ["[", "]"], ["(", ")"]],
+	"colorizedBracketPairs": [["{", "}"], ["[", "]"], ["(", ")"]],
+	"autoClosingPairs": [
+		{
+			"open": "{",
+			"close": "}"
+		},
+		{
+			"open": "[",
+			"close": "]"
+		},
+		{
+			"open": "(",
+			"close": ")"
+		},
+		{
+			"open": "\"",
+			"close": "\"",
+			"notIn": ["string"]
+		},
+		{
+			"open": "/*",
+			"close": " */",
+			"notIn": ["string"]
+		},
+		{
+			"open": "`",
+			"close": "`",
+			"notIn": ["string"]
+		},
+		{
+			"open": "```",
+			"close": "```",
+			"notIn": ["string"]
+		}
+	],
+	"autoCloseBefore": ";:.,=}])> \n\t",
+	"surroundingPairs": [
+		["{", "}"],
+		["[", "]"],
+		["(", ")"],
+		["<", ">"],
+		["\"", "\""],
+		["'", "'"],
+		["`", "`"],
+		["```", "```"]
+	],
+	"indentationRules": {
+		"increaseIndentPattern": "^.*\\{[^}\"']*$|^.*\\([^\\)\"']*$",
+		"decreaseIndentPattern": "^\\s*(\\s*\\/[*].*[*]\\/\\s*)*[})]"
+	},
+	/* Folding range regex is needed here
+	for vscode to display region marker
+	labels in the minimap */
+	"folding": {
+		"markers": {
+			"start": "^\\s*(?://\\s*#?\\s*region\\b:?\\s*|/\\*\\s*#?\\s*region\\b:?\\s*|#ifn?def\\b)",
+			"end": "^\\s*(?://\\s*#?\\s*endregion\\b:?\\s*|/\\*\\s*#?\\s*endregion\\b:?\\s*\\*/|#endif\\b)"
+		}
+	}
+}
