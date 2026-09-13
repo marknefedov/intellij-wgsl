@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Store managed wgsl-analyzer binaries in the plugin-specific `intellij-wgsl/wgsl-analyzer` IDE cache directory using `PathManager.getSystemDir()`.
+
 - Add configurable WGSL/WESL type, function, field, parameter, and variable colors with light and dark defaults, using the existing TextMate lexer.
 
 - Improve WGSL/WESL TextMate scopes for structs, aliases, explicit types, parameters, and fields, including lowercase type names and nested templates.

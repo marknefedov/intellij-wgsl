@@ -32,7 +32,7 @@ class WgslLspClientDescriptor(project: Project) : ProjectWideLspClientDescriptor
         val executable = if (settings.managed) {
             try {
                 WgslServerInstaller.install(
-                    Path.of(PathManager.getSystemPath(), "wgsl-analyzer"),
+                    PathManager.getSystemDir().resolve("intellij-wgsl").resolve("wgsl-analyzer"),
                     WgslServerInstaller.currentAsset(), ::download,
                 ).toString()
             } catch (exception: IOException) {
