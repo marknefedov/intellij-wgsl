@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.3.1 - 2026-09-13
+
 - Update the managed wgsl-analyzer to 2026-09-13.1, with verified archive and executable checksums for all five supported platforms.
 - Add server-backed context-aware keyword, attribute, address-space, access-mode, attribute-argument, and type completion, including automatic completion after `@`.
 - Improve completion replacement boundaries and suppress suggestions inside comments and strings.
