@@ -15,8 +15,10 @@ import java.util.zip.GZIPOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
+// All paths in this test are local TemporaryFolder fixtures, never remote Eel paths.
+@Suppress("UseOptimizedEelFunctions")
 class WgslServerInstallerTest {
-    @get:Rule val temporary = TemporaryFolder()
+    @get:Rule val temporary: TemporaryFolder = TemporaryFolder()
 
     private fun fixture(zip: Boolean = false): Pair<Path, WgslServerInstaller.Asset> {
         val binary = temporary.newFile().toPath().also { Files.writeString(it, "verified executable") }
@@ -41,7 +43,7 @@ class WgslServerInstallerTest {
         val (archive, asset) = fixture()
         val cache = temporary.newFolder().toPath()
         val calls = AtomicInteger()
-        val download: (String, Path) -> Unit = { _, path -> calls.incrementAndGet(); Files.copy(archive, path, REPLACE_EXISTING); Unit }
+        val download: (String, Path) -> Unit = { _, path -> calls.incrementAndGet(); Files.copy(archive, path, REPLACE_EXISTING) }
         val executable = WgslServerInstaller.install(cache, asset, download)
         assertEquals("verified executable", Files.readString(executable))
         assertEquals(executable, WgslServerInstaller.install(cache, asset) { _, _ -> fail("Cache must work offline") })

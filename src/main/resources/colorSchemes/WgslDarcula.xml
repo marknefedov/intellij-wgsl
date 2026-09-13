@@ -1,0 +1,7 @@
+<list>
+    <option name="WGSL.TYPE"><value><option name="FOREGROUND" value="56B6C2"/></value></option>
+    <option name="WGSL.FUNCTION"><value><option name="FOREGROUND" value="61AFEF"/></value></option>
+    <option name="WGSL.FUNCTION_CALL"><value><option name="FOREGROUND" value="61AFEF"/></value></option>
+    <option name="WGSL.FIELD"><value><option name="FOREGROUND" value="C792EA"/></value></option>
+    <option name="WGSL.PARAMETER"><value><option name="FOREGROUND" value="E5C07B"/></value></option>
+</list>

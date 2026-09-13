@@ -5,21 +5,23 @@ import com.intellij.openapi.util.IconLoader
 import org.jetbrains.plugins.textmate.TextMateBackedFileType
 import javax.swing.Icon
 
-/** TextMate supplies the language and highlighting; these registrations retain file identity and icons. */
-class WgslFileType private constructor(
-    private val typeName: String,
-    private val description: String,
-    private val extension: String,
-) : FileType, TextMateBackedFileType {
-    override fun getName() = typeName
-    override fun getDescription() = description
-    override fun getDefaultExtension() = extension
-    override fun getIcon(): Icon = ICON
-    override fun isBinary() = false
+object WgslIcons {
+    val FILE: Icon = IconLoader.getIcon("/icons/wgsl.svg", WgslIcons::class.java)
+}
 
-    companion object {
-        @JvmField val WGSL = WgslFileType("WGSL File", "WGSL", "wgsl")
-        @JvmField val WESL = WgslFileType("WESL File", "WESL", "wesl")
-        val ICON: Icon = IconLoader.getIcon("/icons/wgsl.svg", WgslFileType::class.java)
-    }
+/** TextMate supplies the language and highlighting; these registrations retain file identity and icons. */
+class WgslFileType : FileType, TextMateBackedFileType {
+    override fun getName() = "WGSL File"
+    override fun getDescription() = "WGSL"
+    override fun getDefaultExtension() = "wgsl"
+    override fun getIcon(): Icon = WgslIcons.FILE
+    override fun isBinary() = false
+}
+
+class WeslFileType : FileType, TextMateBackedFileType {
+    override fun getName() = "WESL File"
+    override fun getDescription() = "WESL"
+    override fun getDefaultExtension() = "wesl"
+    override fun getIcon(): Icon = WgslIcons.FILE
+    override fun isBinary() = false
 }

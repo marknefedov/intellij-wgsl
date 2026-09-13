@@ -4,10 +4,16 @@
 
 ## Unreleased
 
+- Add configurable WGSL/WESL type, function, field, parameter, and variable colors with light and dark defaults, using the existing TextMate lexer.
+
+- Improve WGSL/WESL TextMate scopes for structs, aliases, explicit types, parameters, and fields, including lowercase type names and nested templates.
+
+- Modernize settings with Kotlin UI DSL, localized labels, and tracked state with immutable snapshots; upgrade the Kotlin compiler to 2.4.20.
+
 - Rebuild the plugin in Kotlin using JetBrains LSP and upstream WGSL/WESL TextMate grammars.
 - Download and verify pinned wgsl-analyzer binaries on first use, with a custom executable option.
 - Add project server settings and restart integration with the Language Services widget.
-- Require an LSP-capable IntelliJ IDE 2026.1.4 or newer; migrate to Gradle 9.7.1 and Java 21.
+- Require an LSP-capable IntelliJ-based IDE 2026.2.2 or newer; migrate to Gradle 9.7.1 and Java 21.
 - Remove the native parser, JFlex lexer, semantic analysis, and legacy custom URL imports.
 
 ## 0.0.37 - 2025-08-12
@@ -31,11 +37,11 @@
 ## 0.0.33 - 2024-10-25
 
 - added support for builtin type aliases - #78
-- updated to latest IntelliJ platform
+- updated to the latest IntelliJ Platform
 
 ## 0.0.32 - 2024-08-01
 
-- remove max release so hopefully it should work for all future versions - @andreypfau
+- Remove the maximum supported version to allow future versions — @andreypfau
 
 ## 0.0.31 - 2024-04-11
 
@@ -62,7 +68,7 @@
 
 - better code completion from @rosingrind - closes #53
 - code fixes from @rosingrind
-- updated for 2023.2 based IDEs
+- updated for IDEs based on 2023.2
 
 ## 0.0.26
 
@@ -81,14 +87,14 @@
 
 ### Added
 
-- updated max version of IntelliJ to 2023.1
+- updated the maximum version of IntelliJ IDEA to 2023.1
 - added preprocessor stuff to the top level in the parser
 
 ## 0.0.23
 
 ### Added
 
-- updated max version of IntelliJ to 2022.3
+- updated the maximum version of IntelliJ IDEA to 2022.3
 - updated to JDK 17
 - added examples
 
@@ -111,9 +117,9 @@
 
 - fix for f16 and f32 code completions - #43
 - added support for const and override expressions - #44
-- added a warning for old global constant syntax - disable with
+- added a warning for old global constant syntax — disable with
   - `\\+ old-global-constant-decl` on the first line of the file
-- fixed sized arrays - #45
+- fixed-size arrays - #45
 
 ## 0.0.19
 
@@ -132,14 +138,14 @@
       \\+ old-attribute-syntax old-struct-syntax old-attributes
       ```
       - old-attribute-syntax disables the warning on the old bracket style attributes
-      - old-struct-syntax disable the warning for semicolons separating `stuct` members
-      - old-attributes disables the warning for old deprecated attributes such as `stage`
+      - `old-struct-syntax` disables the warning for semicolons separating `struct` members
+      - `old-attributes` disables the warning for old deprecated attributes such as `stage`
 
 ## 0.0.17
 
 ### Added
 
-- increase maximum build number for IntelliJ platform to 222 - #36
+- increase the maximum build number for the IntelliJ Platform to 222 - #36
 
 ## 0.0.16
 
@@ -154,7 +160,7 @@
 - updating grammar to handle the latest spec changes
   - while
   - staticAssert
-  - vec and mat without type when used as a constructor see #32
+  - Allow vec and mat constructors without an explicit type; see #32
 
 ## 0.0.14
 
@@ -176,7 +182,7 @@
 ### Added
 
 - All currently defined attributes are supported
-- Added warnings for deprecated stage attribute
+- Added warnings for the deprecated stage attribute
 - Added hover documentation for all defined attributes
 - Added warnings for deprecated attribute syntax
 
@@ -191,7 +197,7 @@
 
 ### Added
 
-- Fixed null pointer exception in the annotator
+- Fixed a null pointer exception in the annotator
 
 ## 0.0.9
 
@@ -201,20 +207,20 @@
   - Initial code folding implementation
   - A bracket matcher that matches common bracket types
   - Updated annotator to annotate reserved keywords
-  - Added keyword completion contributor that allows for completing all built-in keywords.
-  - Added built-in completion handler that completes all built-in functions.
+  - Added a keyword completion contributor that allows for completing all built-in keywords.
+  - Added a built-in completion handler that completes all built-in functions.
 
 ## 0.0.8
 
 ### Added
 
 - Changes from HolgerGottChristensen
-  - Updated the colour for built in types to be Keyword rather than class name
-  - Colour struct fields
-  - Colour attributes
-  - Colour built in functions
-  - Add error when a fragment only function is used outside of a fragment stage
-  - Colour function declarations
+  - Updated the color for built-in types to be Keyword rather than class name
+  - Color struct fields
+  - Color attributes
+  - Color built-in functions
+  - Add an error when a fragment-only function is used outside a fragment stage
+  - Color function declarations
 
 ## 0.0.7
 
@@ -260,7 +266,7 @@
 
 ### Added
 
-- Colour settings page
+- Color settings page
 - Syntax highlighting using the output from the parser
 - Lexer and parser for WGSL
 - Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)

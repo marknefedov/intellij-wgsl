@@ -6,7 +6,7 @@ TextMate grammars for syntax highlighting. Provides server-backed completion,
 diagnostics, hover documentation, navigation, formatting, parameter information,
 and inlay hints, according to the capabilities of the selected server.
 
-Requires an IntelliJ-based IDE with JetBrains LSP support, version **2026.1.4 or
+Requires an IntelliJ-based IDE with JetBrains LSP support, version **2026.2.2 or
 newer**, and the bundled **TextMate Bundles** plugin.
 <!-- Plugin description end -->
 
@@ -28,6 +28,12 @@ executable is downloaded again. IDE HTTP proxy settings apply to downloads.
 
 ## Settings
 
+Open **Settings | Editor | Color Scheme | WGSL / WESL** to customize types,
+function declarations and calls, fields/swizzles, parameter declarations, and
+variables. Light and dark defaults are included. Colors use TextMate scopes and
+work without the language server; parameter references and other ambiguous names
+remain lexical classifications rather than resolved symbols.
+
 Open **Settings | Languages & Frameworks | WGSL / WESL**:
 
 - **Enable wgsl-analyzer** controls semantic features independently of highlighting.
@@ -43,20 +49,18 @@ settings and server process; managed binaries are shared through the IDE cache.
 
 The managed release provides Windows x64/ARM64, Linux x64 (musl)/ARM64 (glibc), and
 macOS ARM64 executables. Upstream does not publish an Intel macOS executable for
-this release; select a locally built executable there. Custom mode can also be
+this release; select a locally built executable there. The custom executable mode can also be
 used in offline environments. First-time managed installation requires access to
 GitHub release downloads.
 
 ## Compatibility and migration
 
-This replaces the original Java/JFlex/PSI implementation. The plugin ID remains
-`WGSL`, so it updates the existing Marketplace plugin rather than creating a
-second plugin. File registration and the existing icon are retained.
+This replaces the original Java/JFlex/PSI implementation. The plugin ID is `WGSL_WESL`, separate from the original `WGSL` plugin. File registration and the existing icon are retained.
 
 - Open-source IntelliJ IDEA builds and Android Studio do not provide the required
   JetBrains LSP module. The old Community 2024.2 baseline is no longer supported.
 - The detailed native parser, completion, annotations, and reference/rename code
-  have been removed. Rename and find-usages availability depends on the selected
+  have been removed. The availability of rename and find-usages features depends on the selected
   server; the pinned server must not be assumed to provide every LSP feature.
 - Old custom URL import settings and per-file warning suppression comments are
   not migrated. Configure project/import behavior supported by wgsl-analyzer.
@@ -66,7 +70,7 @@ second plugin. File registration and the existing icon are retained.
 
 ## Development
 
-Use **JDK 21** and the checked-in **Gradle 9.7.1 wrapper**:
+Use **JDK 21**, **Kotlin 2.4.20**, and the checked-in **Gradle 9.7.1 wrapper**:
 
 ```sh
 ./gradlew test buildPlugin
@@ -91,3 +95,6 @@ for the exact grammar revision and licenses. The pinned server manifest is
 `src/main/resources/wgsl-server.properties`; updating it requires validating the
 release archive hashes and recalculating extracted executable hashes for each
 supported platform.
+
+The compiler targets Kotlin 2.4 APIs and uses the IDE-bundled standard library.
+Settings use Kotlin UI DSL and tracked persistent state and immutable snapshots.

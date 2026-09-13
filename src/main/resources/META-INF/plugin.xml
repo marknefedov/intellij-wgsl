@@ -1,18 +1,21 @@
 <idea-plugin>
-    <id>WGSL</id>
-    <name>WGSL Support</name>
-    <vendor>dparnell</vendor>
+    <id>WGSL_WESL</id>
+    <name>WGSL / WESL</name>
+    <vendor>mark_nefedov</vendor>
     <category>Custom Languages</category>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.lsp</depends>
-    <depends>com.intellij.modules.ultimate</depends>
     <depends>org.jetbrains.plugins.textmate</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="WGSL File" implementationClass="wgslplugin.WgslFileType" fieldName="WGSL" extensions="wgsl"/>
-        <fileType name="WESL File" implementationClass="wgslplugin.WgslFileType" fieldName="WESL" extensions="wesl"/>
+        <fileType name="WGSL File" implementationClass="wgslplugin.WgslFileType" extensions="wgsl"/>
+        <fileType name="WESL File" implementationClass="wgslplugin.WeslFileType" extensions="wesl"/>
         <textmate.bundleProvider implementation="wgslplugin.WgslTextMateBundleProvider"/>
+        <lang.syntaxHighlighterFactory language="textmate" implementationClass="wgslplugin.WgslSyntaxHighlighterFactory" order="first"/>
+        <colorSettingsPage implementation="wgslplugin.WgslColorSettingsPage"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/WgslDefault.xml"/>
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/WgslDarcula.xml"/>
         <platform.lsp.integrationProvider implementation="wgslplugin.WgslLspIntegrationProvider"/>
         <projectConfigurable parentId="language" instance="wgslplugin.WgslSettingsConfigurable"
-                             id="wgsl.languageServer" displayName="WGSL / WESL"/>
+                             id="wgsl.languageServer" bundle="messages.WgslBundle" key="settings.displayName"/>
     </extensions>
 </idea-plugin>

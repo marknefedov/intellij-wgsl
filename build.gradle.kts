@@ -5,7 +5,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 plugins {
     java
-    kotlin("jvm") version "2.3.20"
+    kotlin("jvm") version "2.4.20"
     id("org.jetbrains.intellij.platform") version "2.18.1"
     id("org.jetbrains.changelog") version "2.5.0"
 }
@@ -28,11 +28,17 @@ dependencies {
 }
 
 java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
-kotlin { jvmToolchain(21) }
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4
+        languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4
+    }
+}
 
 intellijPlatform {
     pluginConfiguration {
-        name = "WGSL Support"
+        name = "WGSL / WESL"
         version = project.version.toString()
         ideaVersion { sinceBuild = providers.gradleProperty("pluginSinceBuild") }
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
@@ -67,4 +73,8 @@ tasks.wrapper { gradleVersion = "9.7.1" }
 
 tasks.test {
     providers.gradleProperty("wgslServerArchive").orNull?.let { systemProperty("wgsl.server.test.archive", it) }
+}
+
+tasks.processTestResources {
+    from("textmate") { into("textmate") }
 }

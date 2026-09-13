@@ -8,11 +8,11 @@ import com.intellij.platform.lsp.api.lsWidget.LspClientWidgetItem
 
 class WgslLspIntegrationProvider : LspIntegrationProvider {
     override fun fileOpened(project: Project, file: VirtualFile, clientStarter: LspIntegrationProvider.LspClientStarter) {
-        if (WgslSettings.getInstance(project).state.enabled && WgslLspClientDescriptor.isShaderFile(file)) {
+        if (WgslSettings.getInstance(project).options.enabled && WgslLspClientDescriptor.isShaderFile(file)) {
             clientStarter.ensureClientStarted(WgslLspClientDescriptor(project))
         }
     }
 
     override fun createWidgetItem(lspClient: LspClient, currentFile: VirtualFile?): LspClientWidgetItem =
-        LspClientWidgetItem(lspClient, currentFile, WgslFileType.ICON, WgslSettingsConfigurable::class.java)
+        LspClientWidgetItem(lspClient, currentFile, WgslIcons.FILE, WgslSettingsConfigurable::class.java)
 }

@@ -47,7 +47,6 @@ class WgslLiveServerTest {
         try {
             val initialization = InitializeParams().apply {
                 processId = ProcessHandle.current().pid().toInt()
-                rootUri = root.toUri().toString()
                 workspaceFolders = listOf(WorkspaceFolder(root.toUri().toString(), "test"))
                 capabilities = ClientCapabilities()
                 initializationOptions = emptyMap<String, Any>()
@@ -58,7 +57,7 @@ class WgslLiveServerTest {
             server.textDocumentService.didOpen(DidOpenTextDocumentParams(TextDocumentItem(file.toUri().toString(), "wgsl", 1, source)))
             val character = source.lines()[1].indexOf("material.") + "material.".length
             val parameters = CompletionParams(TextDocumentIdentifier(file.toUri().toString()), Position(1, character))
-            var labels: List<String> = emptyList()
+            var labels: List<String>
             val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15)
             // Initial workspace loading can briefly produce an empty completion response.
             do {

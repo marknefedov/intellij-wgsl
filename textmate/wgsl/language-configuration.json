@@ -54,9 +54,6 @@
 		"increaseIndentPattern": "^.*\\{[^}\"']*$|^.*\\([^\\)\"']*$",
 		"decreaseIndentPattern": "^\\s*(\\s*\\/[*].*[*]\\/\\s*)*[})]"
 	},
-	/* Folding range regex is needed here
-	for vscode to display region marker
-	labels in the minimap */
 	"folding": {
 		"markers": {
 			"start": "^\\s*(?://\\s*#?\\s*region\\b:?\\s*|/\\*\\s*#?\\s*region\\b:?\\s*|#ifn?def\\b)",

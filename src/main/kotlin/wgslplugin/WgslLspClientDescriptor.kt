@@ -28,7 +28,7 @@ class WgslLspClientDescriptor(project: Project) : ProjectWideLspClientDescriptor
     override fun getLanguageId(file: VirtualFile) = if (file.extension.equals("wesl", ignoreCase = true)) "wesl" else "wgsl"
 
     override fun createCommandLine(): GeneralCommandLine {
-        val settings = WgslSettings.getInstance(project).state
+        val settings = WgslSettings.getInstance(project).options
         val executable = if (settings.managed) {
             try {
                 WgslServerInstaller.install(
@@ -46,9 +46,9 @@ class WgslLspClientDescriptor(project: Project) : ProjectWideLspClientDescriptor
         return GeneralCommandLine(executable).withCharset(Charsets.UTF_8).withWorkDirectory(project.basePath)
     }
 
-    override fun createInitializationOptions(): Any = WgslConfiguration.parse(WgslSettings.getInstance(project).state.configuration)
+    override fun createInitializationOptions(): Any = WgslConfiguration.parse(WgslSettings.getInstance(project).options.configuration)
     override fun getWorkspaceConfiguration(item: ConfigurationItem): Any? =
-        WgslConfiguration.section(WgslConfiguration.parse(WgslSettings.getInstance(project).state.configuration), item.section)
+        WgslConfiguration.section(WgslConfiguration.parse(WgslSettings.getInstance(project).options.configuration), item.section)
 
     companion object {
         fun isShaderFile(file: VirtualFile): Boolean = !file.isDirectory && file.isInLocalFileSystem &&
