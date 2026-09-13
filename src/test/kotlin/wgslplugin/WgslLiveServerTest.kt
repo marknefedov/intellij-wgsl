@@ -53,6 +53,7 @@ class WgslLiveServerTest {
             }
             val result = server.initialize(initialization).get(30, TimeUnit.SECONDS)
             assertNotNull(result.capabilities.completionProvider)
+            assertTrue(result.capabilities.completionProvider.triggerCharacters.containsAll(listOf(".", "@")))
             server.initialized(InitializedParams())
             server.textDocumentService.didOpen(DidOpenTextDocumentParams(TextDocumentItem(file.toUri().toString(), "wgsl", 1, source)))
             val character = source.lines()[1].indexOf("material.") + "material.".length
