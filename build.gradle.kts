@@ -69,6 +69,13 @@ tasks.withType<PrepareSandboxTask>().configureEach {
     from("textmate") { into("${project.name}/textmate") }
 }
 
+tasks.named<PrepareSandboxTask>("prepareTestSandbox") {
+    // The test runner shares a core classloader: Ultimate's obfuscated startup
+    // class collides with an unrelated class in product-backend.jar (IDEA 2026.2.2).
+    // Keep this exclusion in the test sandbox; TextMate and LSP remain enabled.
+    disabledPlugins.add("com.intellij.modules.ultimate")
+}
+
 tasks.wrapper { gradleVersion = "9.7.1" }
 
 tasks.test {
