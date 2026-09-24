@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+- Update the managed wgsl-analyzer to 2026-09-24, with refreshed archive and executable checksums for all five supported platforms.
+- Include upstream formatter improvements and the fix for configuration updates resetting settings to defaults.
+
 ## 0.3.1 - 2026-09-13
 
 - Update the managed wgsl-analyzer to 2026-09-13.1, with verified archive and executable checksums for all five supported platforms.

@@ -18,7 +18,7 @@ import java.util.zip.ZipInputStream
 
 /** Installs only pinned, verified executables. Archive entry paths never become output paths. */
 object WgslServerInstaller {
-    const val VERSION = "2026-09-13.1"
+    const val VERSION = "2026-09-24"
     private const val MAX_BINARY_BYTES = 128L * 1024 * 1024
 
     data class Asset(val target: String, val name: String, val archiveSha256: String, val binarySha256: String) {
