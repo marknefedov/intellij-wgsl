@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.4.1 - 2026-09-29
+
 - Fix the managed server failing to start on Linux x64 distributions that use glibc: use the glibc build, and keep the musl build only for musl-based systems such as Alpine.
 
 ## 0.4.0 - 2026-09-29
