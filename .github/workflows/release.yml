@@ -91,8 +91,8 @@ jobs:
           echo "::add-mask::$PUBLISH_TOKEN"
           ./gradlew publishPlugin
 
-      # Create a pull request
-      - name: Create Pull Request
+      # Create and automatically merge the release changelog update.
+      - name: Create and merge changelog pull request
         if: ${{ steps.properties.outputs.changelog != '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -122,8 +122,10 @@ jobs:
             --force \
             || true
 
-          gh pr create \
+          PR_URL=$(gh pr create \
             --title "Changelog update - \`$VERSION\`" \
             --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
             --label "$LABEL" \
-            --head $BRANCH
+            --head "$BRANCH")
+          echo "$PR_URL"
+          gh pr merge "$PR_URL" --auto --merge --match-head-commit "$(git rev-parse HEAD)"

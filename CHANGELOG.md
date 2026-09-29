@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+- Update the managed wgsl-analyzer to 2026-09-29, with refreshed archive and executable checksums for all five supported platforms.
+- Include upstream fixes for Windows paths, Cargo workspace discovery, module graphs, type inference, and diagnostics.
+
 ## 0.3.2 - 2026-09-24
 
 - Update the managed wgsl-analyzer to 2026-09-24, with refreshed archive and executable checksums for all five supported platforms.
