@@ -24,9 +24,9 @@ class WgslLiveServerTest {
         assumeTrue("Supply wgslServerArchive to exercise a downloaded release", archivePath != null)
         val asset = WgslServerInstaller.currentAsset()
         val release = WgslServerInstaller.Release("local", mapOf(asset.name to WgslServerInstaller.sha256(Path.of(archivePath))))
-        val executable = WgslServerInstaller.install(temporary.newFolder("cache").toPath(), asset, release) { _, destination ->
+        val executable = WgslServerInstaller.install(temporary.newFolder("cache").toPath(), asset, release, null) { _, destination ->
             Files.copy(Path.of(archivePath), destination, REPLACE_EXISTING)
-        }
+        }.executable
         val root = temporary.newFolder("project").toPath()
         val source = "struct Material { roughness: f32, }\nfn main() { var material: Material; material. }\n"
         val file = root.resolve("shader.wgsl")

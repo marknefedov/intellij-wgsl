@@ -30,7 +30,7 @@ object WgslManagedServer {
             return installation.executable
         }
         lastCheck.set(System.currentTimeMillis())
-        return WgslServerInstaller.install(cache, asset, latestRelease(), ::download)
+        return WgslServerInstaller.install(cache, asset, latestRelease(), null, ::download).executable
     }
 
     // Server restarts, including the one after an update, and additional projects reuse a recent check.
@@ -48,13 +48,15 @@ object WgslManagedServer {
                         return
                     }
                     if (release.tag == installedTag) return
-                    try {
-                        WgslServerInstaller.install(cache, asset, release, ::download)
+                    val installation = try {
+                        WgslServerInstaller.install(cache, asset, release, installedTag, ::download)
                     } catch (exception: IOException) {
                         LOG.warn("Cannot update wgsl-analyzer to ${release.tag}", exception)
                         return
                     }
-                    LOG.info("Updated wgsl-analyzer from $installedTag to ${release.tag}")
+                    // Another IDE instance may have installed a different release meanwhile; run whatever is current.
+                    if (installation.tag == installedTag) return
+                    LOG.info("Updated wgsl-analyzer from $installedTag to ${installation.tag}")
                     restartManagedServers()
                 }
             })

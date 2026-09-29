@@ -81,24 +81,30 @@ object WgslServerInstaller {
     }
 
     /**
-     * The most recently installed release, if its executable is still intact. Works offline and does not wait for a
-     * concurrent update: installation replaces each file atomically and keeps the previous release.
+     * The most recently installed release, if its executable is still intact and can be run. Works offline and does not
+     * wait for a concurrent update: installation replaces each file atomically and keeps the previous release.
      */
     fun installed(cache: Path, asset: Asset): Installation? = try {
-        verifiedInstallation(cache.resolve(asset.target), asset)
+        // Content checks do not cover permissions, which a cache backup and restore can drop.
+        verifiedInstallation(cache.resolve(asset.target), asset)?.also { makeExecutable(it.executable) }
     } catch (_: IOException) {
         null
     }
 
-    // JVM and file locks serialize installation across projects and IDE instances sharing a cache.
-    fun install(cache: Path, asset: Asset, release: Release, download: (String, Path) -> Unit): Path {
+    /**
+     * Installs [release] unless the cache has moved on. [replacing] is the tag the caller saw installed when it resolved
+     * [release]; if another project or IDE instance has installed a different release since, that one is kept and
+     * returned, so metadata resolved before a concurrent update cannot downgrade the shared cache. JVM and file locks
+     * serialize installation across projects and IDE instances sharing a cache.
+     */
+    fun install(cache: Path, asset: Asset, release: Release, replacing: String?, download: (String, Path) -> Unit): Installation {
         val directory = cache.resolve(asset.target)
         Files.createDirectories(directory)
         return locked(directory) {
             val previous = verifiedInstallation(directory, asset)
-            if (previous?.tag == release.tag) {
+            if (previous != null && (previous.tag == release.tag || previous.tag != replacing)) {
                 makeExecutable(previous.executable)
-                return@locked previous.executable
+                return@locked previous
             }
             val archiveSha256 = release.sha256(asset)
             val archive = Files.createTempFile(directory, "download-", ".tmp")
@@ -117,7 +123,7 @@ object WgslServerInstaller {
                 // Keep the previous release: another IDE instance may be about to start it.
                 prune(directory, setOfNotNull(release.tag, previous?.tag))
                 prune(cache) { LEGACY_PINNED.matches(it) }
-                executable
+                Installation(release.tag, executable)
             } finally {
                 Files.deleteIfExists(archive)
                 Files.deleteIfExists(unpacked)
