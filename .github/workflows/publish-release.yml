@@ -1,0 +1,33 @@
+# Publishes a draft release prepared by the Build workflow, as the Publish button in the GitHub UI would.
+# A release published with GITHUB_TOKEN does not emit `release` events to other workflows, so the Release
+# and Release assets workflows are dispatched explicitly with the same tag.
+
+name: Publish release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Draft release tag to publish (for example v0.4.1)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Publish draft
+        run: |
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
+          gh release edit "$RELEASE_TAG" --draft=false
+      - name: Start release workflows
+        run: |
+          gh workflow run release.yml -f tag="$RELEASE_TAG"
+          gh workflow run release-assets.yml -f tag="$RELEASE_TAG"

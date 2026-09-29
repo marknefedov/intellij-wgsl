@@ -196,7 +196,9 @@ class WgslServerInstallerTest {
     @Test fun `platform selection supports aliases and rejects unsupported platforms`() {
         assertEquals("x86_64-pc-windows-msvc", WgslServerInstaller.assetFor("Windows 11", "amd64").target)
         assertEquals("aarch64-pc-windows-msvc", WgslServerInstaller.assetFor("Windows 11", "aarch64").target)
-        assertEquals("x86_64-unknown-linux-musl", WgslServerInstaller.assetFor("Linux", "x86_64").target)
+        assertEquals("x86_64-unknown-linux-gnu", WgslServerInstaller.assetFor("Linux", "x86_64").target)
+        assertEquals("x86_64-unknown-linux-musl", WgslServerInstaller.assetFor("Linux", "amd64", musl = true).target)
+        assertEquals("aarch64-unknown-linux-gnu", WgslServerInstaller.assetFor("Linux", "aarch64", musl = true).target)
         assertEquals("aarch64-unknown-linux-gnu", WgslServerInstaller.assetFor("Linux", "arm64").target)
         assertEquals("aarch64-apple-darwin", WgslServerInstaller.assetFor("Mac OS X", "aarch64").target)
         assertThrows(IOException::class.java) { WgslServerInstaller.assetFor("Mac OS X", "x86_64") }
