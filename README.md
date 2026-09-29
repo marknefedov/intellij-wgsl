@@ -13,19 +13,24 @@ newer**, and the bundled **TextMate Bundles** plugin.
 ## Getting started
 
 1. Install the plugin and open a `.wgsl` or `.wesl` file.
-2. On the first language-server startup, the plugin downloads the pinned
-   **wgsl-analyzer 2026-09-29** release from [marknefedov/wgsl-analyzer](https://github.com/marknefedov/wgsl-analyzer/releases/tag/2026-09-29).
-   Both the archive and executable
-   are checked against bundled SHA-256 digests before execution.
-3. Subsequent starts reuse the verified executable from
-   `<IDE system/cache directory>/intellij-wgsl/wgsl-analyzer/2026-09-29/<target>/`.
-4. Use the IDE's Language Services widget to inspect server status, restart it,
+2. On the first language-server startup, the plugin downloads the latest
+   [marknefedov/wgsl-analyzer](https://github.com/marknefedov/wgsl-analyzer/releases/latest)
+   release for your platform. The archive is checked against the SHA-256 digest
+   GitHub publishes for the release asset before anything is extracted; releases
+   without a digest are not installed.
+3. Subsequent starts reuse the cached executable from
+   `<IDE system/cache directory>/intellij-wgsl/wgsl-analyzer/<target>/<release>/`,
+   and work offline.
+4. Each time the language server starts, the plugin checks GitHub for a newer
+   release in the background (at most once an hour). When one is found, it is
+   downloaded and verified, and the language servers of open projects restart on
+   the new version. The previous release is kept; older ones are removed.
+5. Use the IDE's Language Services widget to inspect server status, restart it,
    or open its settings. Syntax highlighting also works offline without a server.
 
-There is no automatic tracking of `latest` or `nightly`. A plugin update can
-change the pinned version; older cache directories are left intact for other
-plugin/IDE versions. Interrupted downloads are not installed. A corrupted cached
-executable is downloaded again. IDE HTTP proxy settings apply to downloads.
+Interrupted or unverified downloads are not installed, and a failed update keeps
+the current version. A corrupted cached executable is downloaded again. IDE HTTP
+proxy settings apply to update checks and downloads.
 
 ## Settings
 
@@ -38,7 +43,7 @@ remain lexical classifications rather than resolved symbols.
 Open **Settings | Languages & Frameworks | WGSL / WESL**:
 
 - **Enable wgsl-analyzer** controls semantic features independently of highlighting.
-- **Managed version** downloads and caches the pinned server automatically.
+- **Managed (latest release)** downloads, caches, and updates the server automatically.
 - **Custom executable** accepts an executable path (including spaces) or a command
   such as `wgsl-analyzer` available on the IDE process's PATH. No shell is used.
 - **Server configuration** accepts a JSON object passed as initialization options
@@ -48,11 +53,11 @@ Open **Settings | Languages & Frameworks | WGSL / WESL**:
 Applying changes restarts the project's language server. Each project has its own
 settings and server process; managed binaries are shared through the IDE cache.
 
-The managed release provides Windows x64/ARM64, Linux x64 (musl)/ARM64 (glibc), and
-macOS ARM64 executables. Upstream does not publish an Intel macOS executable for
-this release; select a locally built executable there. The custom executable mode can also be
+Managed releases provide Windows x64/ARM64, Linux x64 (musl)/ARM64 (glibc), and
+macOS ARM64 executables. Upstream does not publish an Intel macOS executable;
+select a locally built executable there. The custom executable mode can also be
 used in offline environments. First-time managed installation requires access to
-GitHub release downloads.
+the GitHub API and release downloads.
 
 ## Compatibility and migration
 
@@ -62,7 +67,7 @@ This replaces the original Java/JFlex/PSI implementation. The plugin ID is `WGSL
   JetBrains LSP module. The old Community 2024.2 baseline is no longer supported.
 - The detailed native parser, completion, annotations, and reference/rename code
   have been removed. The availability of rename and find-usages features depends on the selected
-  server; the pinned server must not be assumed to provide every LSP feature.
+  server; the managed server must not be assumed to provide every LSP feature.
 - Old custom URL import settings and per-file warning suppression comments are
   not migrated. Configure project/import behavior supported by wgsl-analyzer.
 - WESL support follows upstream and remains experimental.
@@ -84,7 +89,7 @@ On Windows use `gradlew.bat`. The distributable ZIP is written to
 TextMate dependency. Unit and editor integration tests do not download the
 language server.
 
-To smoke-test the real pinned server, download the release archive for the host
+To smoke-test a real server, download a release archive for the host
 platform and run `./gradlew test -PwgslServerArchive=/absolute/path/to/archive`.
 The test verifies and installs it into a temporary cache, starts LSP over stdio,
 and requests struct-member completion. It does not use a developer's configured
@@ -92,10 +97,7 @@ server or cache.
 
 Highlighting grammars live in `textmate/wgsl/` and are copied outside the plugin
 JAR into every sandbox and distribution. See [upstream provenance](textmate/wgsl/UPSTREAM.md)
-for the exact grammar revision and licenses. The pinned server manifest is
-`src/main/resources/wgsl-server.properties`; updating it requires validating the
-release archive hashes and recalculating extracted executable hashes for each
-supported platform.
+for the exact grammar revision and licenses.
 
 The compiler targets Kotlin 2.4 APIs and uses the IDE-bundled standard library.
 Settings use Kotlin UI DSL and tracked persistent state and immutable snapshots.
