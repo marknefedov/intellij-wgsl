@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+- Download the latest wgsl-analyzer release instead of a version pinned in the plugin, verified against the SHA-256 digests GitHub publishes for release assets.
+- Check for a newer release when the language server starts and update in the background, restarting managed servers on the new version.
+
 ## 0.3.3 - 2026-09-29
 
 - Update the managed wgsl-analyzer to 2026-09-29, with refreshed archive and executable checksums for all five supported platforms.

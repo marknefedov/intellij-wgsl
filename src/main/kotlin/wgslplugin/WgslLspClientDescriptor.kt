@@ -2,18 +2,13 @@ package wgslplugin
 
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.openapi.application.PathManager
-import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.ProjectWideLspClientDescriptor
 import com.intellij.platform.lsp.api.customization.LspCustomization
 import com.intellij.platform.lsp.api.customization.LspFormattingSupport
-import com.intellij.util.io.HttpRequests
 import org.eclipse.lsp4j.ConfigurationItem
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
 
 class WgslLspClientDescriptor(project: Project) : ProjectWideLspClientDescriptor(project, "wgsl-analyzer") {
     override val lspCustomization = object : LspCustomization() {
@@ -31,10 +26,7 @@ class WgslLspClientDescriptor(project: Project) : ProjectWideLspClientDescriptor
         val settings = WgslSettings.getInstance(project).options
         val executable = if (settings.managed) {
             try {
-                WgslServerInstaller.install(
-                    PathManager.getSystemDir().resolve("intellij-wgsl").resolve("wgsl-analyzer"),
-                    WgslServerInstaller.currentAsset(), ::download,
-                ).toString()
+                WgslManagedServer.executable().toString()
             } catch (exception: IOException) {
                 throw ExecutionException(
                     "Cannot prepare wgsl-analyzer: ${exception.message}. Retry from the Language Services widget, " +
@@ -53,25 +45,5 @@ class WgslLspClientDescriptor(project: Project) : ProjectWideLspClientDescriptor
     companion object {
         fun isShaderFile(file: VirtualFile): Boolean = !file.isDirectory && file.isInLocalFileSystem &&
             (file.extension.equals("wgsl", ignoreCase = true) || file.extension.equals("wesl", ignoreCase = true))
-
-        private fun download(url: String, destination: Path) {
-            ProgressManager.getInstance().progressIndicator?.text = "Downloading wgsl-analyzer ${WgslServerInstaller.VERSION}"
-            HttpRequests.request(url).connectTimeout(15_000).readTimeout(30_000).connect { request ->
-                request.inputStream.use { input ->
-                    Files.newOutputStream(destination).use { output ->
-                        val buffer = ByteArray(8192)
-                        var total = 0L
-                        while (true) {
-                            ProgressManager.checkCanceled()
-                            val count = input.read(buffer)
-                            if (count == -1) break
-                            total += count
-                            if (total > 32L * 1024 * 1024) throw IOException("Server download exceeds size limit")
-                            output.write(buffer, 0, count)
-                        }
-                    }
-                }
-            }
-        }
     }
 }

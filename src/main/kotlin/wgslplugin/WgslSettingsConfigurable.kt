@@ -56,7 +56,7 @@ class WgslSettingsConfigurable(private val project: Project) : SearchableConfigu
     private class SettingsPanel(project: Project) {
         private val enabled = JBCheckBox(WgslBundle.message("settings.enabled"))
         private val mode = ComboBox(arrayOf(
-            WgslBundle.message("settings.managed", WgslServerInstaller.VERSION),
+            WgslBundle.message("settings.managed"),
             WgslBundle.message("settings.custom"),
         ))
         val executable = TextFieldWithBrowseButton()

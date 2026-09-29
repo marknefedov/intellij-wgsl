@@ -15,16 +15,18 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-/** Optional real-server smoke test: pass -PwgslServerArchive=/path/to/the/pinned/platform/archive. */
+/** Optional real-server smoke test: pass -PwgslServerArchive=/path/to/a/release/archive/for/this/platform. */
 class WgslLiveServerTest {
     @get:Rule val temporary = TemporaryFolder()
 
-    @Test fun `pinned server starts over stdio and completes struct fields`() {
+    @Test fun `release server starts over stdio and completes struct fields`() {
         val archivePath = System.getProperty("wgsl.server.test.archive")
         assumeTrue("Supply wgslServerArchive to exercise a downloaded release", archivePath != null)
-        val executable = WgslServerInstaller.install(temporary.newFolder("cache").toPath(), WgslServerInstaller.currentAsset()) { _, destination ->
+        val asset = WgslServerInstaller.currentAsset()
+        val release = WgslServerInstaller.Release("local", mapOf(asset.name to WgslServerInstaller.sha256(Path.of(archivePath))))
+        val executable = WgslServerInstaller.install(temporary.newFolder("cache").toPath(), asset, release, null) { _, destination ->
             Files.copy(Path.of(archivePath), destination, REPLACE_EXISTING)
-        }
+        }.executable
         val root = temporary.newFolder("project").toPath()
         val source = "struct Material { roughness: f32, }\nfn main() { var material: Material; material. }\n"
         val file = root.resolve("shader.wgsl")
