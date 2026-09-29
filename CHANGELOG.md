@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Fix the managed server failing to start on Linux x64 distributions that use glibc: use the glibc build, and keep the musl build only for musl-based systems such as Alpine.
+
 ## 0.4.0 - 2026-09-29
 
 - Download the latest wgsl-analyzer release instead of a version pinned in the plugin, verified against the SHA-256 digests GitHub publishes for release assets.

@@ -53,8 +53,8 @@ Open **Settings | Languages & Frameworks | WGSL / WESL**:
 Applying changes restarts the project's language server. Each project has its own
 settings and server process; managed binaries are shared through the IDE cache.
 
-Managed releases provide Windows x64/ARM64, Linux x64 (musl)/ARM64 (glibc), and
-macOS ARM64 executables. Upstream does not publish an Intel macOS executable;
+Managed releases provide Windows x64/ARM64, Linux x64/ARM64 (glibc 2.28 or newer;
+musl-only x64 systems such as Alpine get the musl build), and macOS ARM64 executables. Upstream does not publish an Intel macOS executable;
 select a locally built executable there. The custom executable mode can also be
 used in offline environments. First-time managed installation requires access to
 the GitHub API and release downloads.

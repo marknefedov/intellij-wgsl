@@ -46,9 +46,13 @@ object WgslServerInstaller {
 
     data class Installation(val tag: String, val executable: Path)
 
-    fun currentAsset(): Asset = assetFor(System.getProperty("os.name"), System.getProperty("os.arch"))
+    fun currentAsset(): Asset = assetFor(System.getProperty("os.name"), System.getProperty("os.arch"), muslOnly())
 
-    fun assetFor(os: String, architecture: String): Asset {
+    // The musl build needs the musl loader, which glibc distributions do not ship; the glibc build needs glibc 2.28+.
+    private fun muslOnly(): Boolean =
+        Files.exists(Path.of("/lib/ld-musl-x86_64.so.1")) && !Files.exists(Path.of("/lib64/ld-linux-x86-64.so.2"))
+
+    fun assetFor(os: String, architecture: String, musl: Boolean = false): Asset {
         val platform = os.lowercase(Locale.ROOT)
         val arch = architecture.lowercase(Locale.ROOT)
         val arm = arch == "aarch64" || arch == "arm64"
@@ -56,7 +60,7 @@ object WgslServerInstaller {
         val windows = platform.startsWith("windows")
         val target = when {
             windows && (arm || x64) -> "${if (arm) "aarch64" else "x86_64"}-pc-windows-msvc"
-            platform == "linux" && (arm || x64) -> if (arm) "aarch64-unknown-linux-gnu" else "x86_64-unknown-linux-musl"
+            platform == "linux" && (arm || x64) -> if (arm) "aarch64-unknown-linux-gnu" else "x86_64-unknown-linux-${if (musl) "musl" else "gnu"}"
             (platform.startsWith("mac") || platform == "darwin") && arm -> "aarch64-apple-darwin"
             else -> throw IOException("No managed wgsl-analyzer binary for $os / $architecture. " +
                 "Choose a custom executable in Settings | Languages & Frameworks | WGSL / WESL")
