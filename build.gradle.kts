@@ -15,6 +15,20 @@ plugins {
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
+// Newest IntelliJ IDEA EAP build (e.g. "263.6800.24"), whichever release it belongs to.
+tasks.printProductsReleases {
+    types = listOf(IntelliJPlatformType.IntellijIdea)
+    channels = listOf(ProductRelease.Channel.EAP)
+    sinceBuild = providers.gradleProperty("pluginSinceBuild")
+}
+val latestEap = tasks.printProductsReleases.flatMap { it.productsReleases }.map { releases ->
+    releases.map { it.substringAfter('-') }.maxWithOrNull { a, b ->
+        val x = a.split('.').map { it.toIntOrNull() ?: 0 }
+        val y = b.split('.').map { it.toIntOrNull() ?: 0 }
+        x.zip(y).map { (i, j) -> i.compareTo(j) }.firstOrNull { it != 0 } ?: x.size.compareTo(y.size)
+    } ?: error("No IntelliJ IDEA EAP build found")
+}
+
 repositories {
     mavenCentral()
     intellijPlatform { defaultRepositories() }
@@ -22,7 +36,8 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdea(providers.gradleProperty("platformVersion"))
+        // -PplatformVersion=eap builds and tests against the newest EAP.
+        intellijIdea(providers.gradleProperty("platformVersion").flatMap { if (it == "eap") latestEap else provider { it } })
         bundledPlugin("org.jetbrains.plugins.textmate")
         testFramework(TestFrameworkType.Platform)
     }
@@ -63,11 +78,7 @@ intellijPlatform {
         ides {
             current()
             // Catch API breaks in the next platform release before it ships.
-            select {
-                types = listOf(IntelliJPlatformType.IntellijIdea)
-                channels = listOf(ProductRelease.Channel.EAP)
-                sinceBuild = providers.gradleProperty("eapSinceBuild")
-            }
+            create(IntelliJPlatformType.IntellijIdea, latestEap)
         }
     }
 }
@@ -84,13 +95,6 @@ tasks.named<PrepareSandboxTask>("prepareTestSandbox") {
     // class collides with an unrelated class in product-backend.jar (IDEA 2026.2.2).
     // Keep this exclusion in the test sandbox; TextMate and LSP remain enabled.
     disabledPlugins.add("com.intellij.modules.ultimate")
-}
-
-// CI reads the latest EAP from here and runs the tests with -PplatformVersion=<build>.
-tasks.printProductsReleases {
-    types = listOf(IntelliJPlatformType.IntellijIdea)
-    channels = listOf(ProductRelease.Channel.EAP)
-    sinceBuild = providers.gradleProperty("eapSinceBuild")
 }
 
 tasks.wrapper { gradleVersion = "9.7.1" }

@@ -62,15 +62,7 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6.3.0
-      - name: Resolve latest EAP
-        shell: bash
-        run: |
-          RELEASE=$(./gradlew printProductsReleases --console=plain -q | grep -m1 -E '^[A-Z]+-[0-9]')
-          echo "Testing against $RELEASE"
-          echo "EAP_VERSION=${RELEASE#*-}" >> "$GITHUB_ENV"
-      - name: Test
-        shell: bash
-        run: ./gradlew test -PplatformVersion="$EAP_VERSION"
+      - run: ./gradlew test -PplatformVersion=eap
       - uses: actions/upload-artifact@v7.0.1
         if: always()
         with:
