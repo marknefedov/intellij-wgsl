@@ -1,12 +1,14 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 plugins {
     java
     kotlin("jvm") version "2.4.20"
-    id("org.jetbrains.intellij.platform") version "2.18.1"
+    id("org.jetbrains.intellij.platform") version "2.19.0"
     id("org.jetbrains.changelog") version "2.5.0"
 }
 
@@ -58,7 +60,15 @@ intellijPlatform {
         channels = listOf(project.version.toString().substringAfter('-', "default").substringBefore('.'))
     }
     pluginVerification {
-        ides { current() }
+        ides {
+            current()
+            // Catch API breaks in the next platform release before it ships.
+            select {
+                types = listOf(IntelliJPlatformType.IntellijIdea)
+                channels = listOf(ProductRelease.Channel.EAP)
+                sinceBuild = "263"
+            }
+        }
     }
 }
 
