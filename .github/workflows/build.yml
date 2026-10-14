@@ -52,10 +52,35 @@ jobs:
           name: plugin-verifier
           path: build/reports/pluginVerifier/
 
+  testEap:
+    name: test (latest EAP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.0.1
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6.3.0
+      - name: Resolve latest EAP
+        shell: bash
+        run: |
+          RELEASE=$(./gradlew printProductsReleases --console=plain -q | grep -m1 -E '^[A-Z]+-[0-9]')
+          echo "Testing against $RELEASE"
+          echo "EAP_VERSION=${RELEASE#*-}" >> "$GITHUB_ENV"
+      - name: Test
+        shell: bash
+        run: ./gradlew test -PplatformVersion="$EAP_VERSION"
+      - uses: actions/upload-artifact@v7.0.1
+        if: always()
+        with:
+          name: reports-eap
+          path: build/reports/
+
   releaseDraft:
     name: Release draft
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [build, verify]
+    needs: [build, verify, testEap]
     runs-on: ubuntu-latest
     permissions:
       contents: write

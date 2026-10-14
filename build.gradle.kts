@@ -66,7 +66,7 @@ intellijPlatform {
             select {
                 types = listOf(IntelliJPlatformType.IntellijIdea)
                 channels = listOf(ProductRelease.Channel.EAP)
-                sinceBuild = "263"
+                sinceBuild = providers.gradleProperty("eapSinceBuild")
             }
         }
     }
@@ -84,6 +84,13 @@ tasks.named<PrepareSandboxTask>("prepareTestSandbox") {
     // class collides with an unrelated class in product-backend.jar (IDEA 2026.2.2).
     // Keep this exclusion in the test sandbox; TextMate and LSP remain enabled.
     disabledPlugins.add("com.intellij.modules.ultimate")
+}
+
+// CI reads the latest EAP from here and runs the tests with -PplatformVersion=<build>.
+tasks.printProductsReleases {
+    types = listOf(IntelliJPlatformType.IntellijIdea)
+    channels = listOf(ProductRelease.Channel.EAP)
+    sinceBuild = providers.gradleProperty("eapSinceBuild")
 }
 
 tasks.wrapper { gradleVersion = "9.7.1" }
