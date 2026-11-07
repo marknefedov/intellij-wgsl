@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.0 - 2026-11-07
+
 - Build, test, and verify against IntelliJ IDEA 2026.3 stable; require build 263.7307.200 or newer.
 - Keep automatic EAP tests and verification, falling back to stable between EAP cycles.
 - Check the latest JetBrains stable release and run compatibility CI weekly to flag platform updates.
