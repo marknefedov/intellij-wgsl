@@ -84,6 +84,11 @@ Use **JDK 21**, **Kotlin 2.4.20**, and the checked-in **Gradle 9.7.1 wrapper**:
 ./gradlew verifyPlugin
 ```
 
+The main build targets the latest stable IntelliJ IDEA. CI also tests and verifies
+the newest EAP at or above the minimum supported build, falling back to stable
+between EAP cycles. Run `./gradlew test -PuseEap=true` to use that target locally.
+Weekly CI checks JetBrains release metadata and flags a newer stable baseline.
+
 On Windows use `gradlew.bat`. The distributable ZIP is written to
 `build/distributions/`. The build downloads the target IntelliJ SDK and its
 TextMate dependency. Unit and editor integration tests do not download the

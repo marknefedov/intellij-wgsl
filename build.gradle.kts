@@ -1,6 +1,8 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 plugins {
@@ -13,6 +15,20 @@ plugins {
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
+val stablePlatformVersion = providers.gradleProperty("platformVersion")
+tasks.printProductsReleases {
+    types = listOf(IntelliJPlatformType.IntellijIdea)
+    channels = listOf(ProductRelease.Channel.EAP)
+    sinceBuild = providers.gradleProperty("pluginSinceBuild")
+}
+val latestEap = tasks.printProductsReleases.flatMap { it.productsReleases }.zip(stablePlatformVersion) { releases, stable ->
+    releases.map { it.substringAfter('-') }.maxWithOrNull { a, b ->
+        val x = a.split('.').map { it.toIntOrNull() ?: 0 }
+        val y = b.split('.').map { it.toIntOrNull() ?: 0 }
+        x.zip(y).map { (i, j) -> i.compareTo(j) }.firstOrNull { it != 0 } ?: x.size.compareTo(y.size)
+    } ?: stable.also { logger.lifecycle("No EAP at or above the supported build; using stable IntelliJ IDEA $it") }
+}
+
 repositories {
     mavenCentral()
     intellijPlatform { defaultRepositories() }
@@ -20,7 +36,8 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdea(providers.gradleProperty("platformVersion"))
+        // -PuseEap=true tests the newest eligible EAP, falling back to stable between EAP cycles.
+        intellijIdea(if (providers.gradleProperty("useEap").map(String::toBoolean).getOrElse(false)) latestEap else stablePlatformVersion)
         bundledPlugin("org.jetbrains.plugins.textmate")
         testFramework(TestFrameworkType.Platform)
     }
@@ -60,6 +77,7 @@ intellijPlatform {
     pluginVerification {
         ides {
             current()
+            create(IntelliJPlatformType.IntellijIdea, latestEap)
         }
     }
 }
