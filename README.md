@@ -6,7 +6,7 @@ TextMate grammars for syntax highlighting. Provides server-backed completion,
 diagnostics, hover documentation, navigation, formatting, parameter information,
 and inlay hints, according to the capabilities of the selected server.
 
-Requires an IntelliJ-based IDE with JetBrains LSP support, version **2026.2.2 or
+Requires an IntelliJ-based IDE with JetBrains LSP support, version **2026.3 or
 newer**, and the bundled **TextMate Bundles** plugin.
 <!-- Plugin description end -->
 
@@ -83,6 +83,11 @@ Use **JDK 21**, **Kotlin 2.4.20**, and the checked-in **Gradle 9.7.1 wrapper**:
 ./gradlew runIde
 ./gradlew verifyPlugin
 ```
+
+The main build targets the latest stable IntelliJ IDEA. CI also tests and verifies
+the newest EAP at or above the minimum supported build, falling back to stable
+between EAP cycles. Run `./gradlew test -PuseEap=true` to use that target locally.
+Weekly CI checks JetBrains release metadata and flags a newer stable baseline.
 
 On Windows use `gradlew.bat`. The distributable ZIP is written to
 `build/distributions/`. The build downloads the target IntelliJ SDK and its

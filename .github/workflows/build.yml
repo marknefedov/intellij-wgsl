@@ -4,12 +4,38 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  stableRelease:
+    name: Check latest stable IntelliJ release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Check JetBrains release metadata
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import urllib.request
+          properties = dict(line.split('=', 1) for line in pathlib.Path('gradle.properties').read_text().splitlines() if '=' in line)
+          properties = {key.strip(): value.strip() for key, value in properties.items()}
+          url = 'https://data.services.jetbrains.com/products/releases?code=IIU&type=release&latest=true'
+          with urllib.request.urlopen(url, timeout=30) as response:
+              release = json.load(response)['IIU'][0]
+          expected = (release['version'], release['build'])
+          configured = (properties['platformVersion'], properties['pluginSinceBuild'])
+          print(f'Configured platform/minimum: {configured}; latest stable: {expected}')
+          if configured != expected:
+              raise SystemExit(f'::error::Update platformVersion and pluginSinceBuild to IntelliJ IDEA {expected[0]} ({expected[1]})')
+          PY
+
   build:
     strategy:
       fail-fast: false
@@ -53,7 +79,7 @@ jobs:
           path: build/reports/pluginVerifier/
 
   testEap:
-    name: test (latest EAP)
+    name: test (latest EAP, or stable between cycles)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -62,7 +88,7 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6.3.0
-      - run: ./gradlew test -PplatformVersion=eap
+      - run: ./gradlew test -PuseEap=true
       - uses: actions/upload-artifact@v7.0.1
         if: always()
         with:
@@ -72,7 +98,7 @@ jobs:
   releaseDraft:
     name: Release draft
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [build, verify, testEap]
+    needs: [build, verify, testEap, stableRelease]
     runs-on: ubuntu-latest
     permissions:
       contents: write
