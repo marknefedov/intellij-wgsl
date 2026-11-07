@@ -6,7 +6,7 @@ TextMate grammars for syntax highlighting. Provides server-backed completion,
 diagnostics, hover documentation, navigation, formatting, parameter information,
 and inlay hints, according to the capabilities of the selected server.
 
-Requires an IntelliJ-based IDE with JetBrains LSP support, version **2026.2.2 or
+Requires an IntelliJ-based IDE with JetBrains LSP support, version **2026.3 or
 newer**, and the bundled **TextMate Bundles** plugin.
 <!-- Plugin description end -->
 

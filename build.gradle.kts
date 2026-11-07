@@ -1,8 +1,6 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 plugins {
@@ -15,20 +13,6 @@ plugins {
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
-// Newest IntelliJ IDEA EAP build (e.g. "263.6800.24"), whichever release it belongs to.
-tasks.printProductsReleases {
-    types = listOf(IntelliJPlatformType.IntellijIdea)
-    channels = listOf(ProductRelease.Channel.EAP)
-    sinceBuild = providers.gradleProperty("pluginSinceBuild")
-}
-val latestEap = tasks.printProductsReleases.flatMap { it.productsReleases }.map { releases ->
-    releases.map { it.substringAfter('-') }.maxWithOrNull { a, b ->
-        val x = a.split('.').map { it.toIntOrNull() ?: 0 }
-        val y = b.split('.').map { it.toIntOrNull() ?: 0 }
-        x.zip(y).map { (i, j) -> i.compareTo(j) }.firstOrNull { it != 0 } ?: x.size.compareTo(y.size)
-    } ?: error("No IntelliJ IDEA EAP build found")
-}
-
 repositories {
     mavenCentral()
     intellijPlatform { defaultRepositories() }
@@ -36,8 +20,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        // -PplatformVersion=eap builds and tests against the newest EAP.
-        intellijIdea(providers.gradleProperty("platformVersion").flatMap { if (it == "eap") latestEap else provider { it } })
+        intellijIdea(providers.gradleProperty("platformVersion"))
         bundledPlugin("org.jetbrains.plugins.textmate")
         testFramework(TestFrameworkType.Platform)
     }
@@ -77,8 +60,6 @@ intellijPlatform {
     pluginVerification {
         ides {
             current()
-            // Catch API breaks in the next platform release before it ships.
-            create(IntelliJPlatformType.IntellijIdea, latestEap)
         }
     }
 }

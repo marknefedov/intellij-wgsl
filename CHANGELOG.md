@@ -4,6 +4,9 @@
 
 ## Unreleased
 
+- Build, test, and verify against IntelliJ IDEA 2026.3 stable; require build 263.7307.200 or newer.
+- Remove EAP-only validation and support the latest stable IntelliJ platform.
+
 ## 0.4.1 - 2026-09-29
 
 - Fix the managed server failing to start on Linux x64 distributions that use glibc: use the glibc build, and keep the musl build only for musl-based systems such as Alpine.
